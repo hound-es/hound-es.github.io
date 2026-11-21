@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hound — Tu sabueso de chollos</title>
+<meta name="description" content="Dile a Hound qué quieres comprar. Vigila el precio día y noche y te avisa por Telegram en cuanto baja. Apúntate a la lista de espera.">
+<meta property="og:title" content="Hound — Tu sabueso de chollos">
+<meta property="og:description" content="Dile a Hound qué quieres comprar. Lo vigila día y noche y te avisa cuando baja de precio.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐕</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0b08;
+    --bg2:#181209;
+    --card:#1d1610;
+    --line:#3a2c1c;
+    --text:#f5efe6;
+    --muted:#b8a88f;
+    --accent:#ff8a2a;
+    --accent2:#ffb45e;
+    --green:#7ddb8a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.logo{font-family:'Sora',sans-serif}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+
+  /* glow */
+  .glow{
+    position:fixed;top:-220px;left:50%;transform:translateX(-50%);
+    width:900px;height:600px;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse at center,rgba(255,138,42,.16),transparent 65%);
+  }
+
+  /* nav */
+  nav{position:relative;z-index:2;padding:22px 0;display:flex;align-items:center;justify-content:space-between}
+  .logo{font-size:1.35rem;font-weight:800;letter-spacing:.5px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:9px}
+  .logo .paw{font-size:1.5rem}
+  .nav-cta{
+    font-size:.9rem;font-weight:600;color:var(--bg);background:var(--accent);
+    padding:9px 18px;border-radius:999px;text-decoration:none;transition:transform .15s,background .15s;
+  }
+  .nav-cta:hover{background:var(--accent2);transform:translateY(-1px)}
+
+  /* hero */
+  .hero{position:relative;z-index:1;text-align:center;padding:64px 0 72px}
+  .badge{
+    display:inline-block;font-size:.82rem;font-weight:600;color:var(--accent2);
+    border:1px solid var(--line);background:var(--card);
+    padding:7px 16px;border-radius:999px;margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:clamp(2.3rem,7vw,4rem);font-weight:800;line-height:1.12;
+    letter-spacing:-1px;max-width:14ch;margin:0 auto 20px;
+  }
+  .hero h1 .sniff{color:var(--accent)}
+  .hero p{
+    font-size:clamp(1.02rem,2.6vw,1.2rem);color:var(--muted);
+    max-width:34rem;margin:0 auto 36px;
+  }
+  .hero p b{color:var(--text);font-weight:600}
+  .cta-row{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .cta{
+    display:inline-block;font-family:'Sora';font-weight:700;font-size:1.05rem;
+    color:var(--bg);background:linear-gradient(135deg,var(--accent),var(--accent2));
+    padding:16px 38px;border-radius:14px;text-decoration:none;
+    box-shadow:0 8px 30px rgba(255,138,42,.28);transition:transform .15s,box-shadow .15s;
+  }
+  .cta:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(255,138,42,.4)}
+  .mini{font-size:.85rem;color:var(--muted)}
+
+  /* mock chat */
+  .chat{
+    max-width:400px;margin:56px auto 0;background:var(--card);
+    border:1px solid var(--line);border-radius:20px;padding:20px;text-align:left;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
+  }
+  .chat-head{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .chat-head .avatar{font-size:1.6rem}
+  .chat-head .name{font-family:'Sora';font-weight:700;font-size:.95rem}
+  .chat-head .status{font-size:.75rem;color:var(--green)}
+  .bubble{
+    max-width:85%;padding:10px 14px;border-radius:16px;font-size:.9rem;margin-bottom:10px;
+  }
+  .bubble.user{background:#2a2015;color:var(--text);margin-left:auto;border-bottom-right-radius:4px}
+  .bubble.hound{background:linear-gradient(135deg,rgba(255,138,42,.18),rgba(255,138,42,.08));border:1px solid var(--line);border-bottom-left-radius:4px}
+  .bubble .price{color:var(--green);font-weight:600}
+
+  /* sections */
+  section{position:relative;z-index:1;padding:64px 0}
+  .kicker{font-size:.8rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:14px}
+  h2{font-size:clamp(1.7rem,4.5vw,2.4rem);font-weight:800;letter-spacing:-.5px;text-align:center;margin-bottom:16px}
+  .sub{color:var(--muted);text-align:center;max-width:36rem;margin:0 auto 44px;font-size:1.02rem}
+
+  /* steps */
+  .steps{display:grid;gap:18px}
+  @media(min-width:760px){.steps{grid-template-columns:repeat(3,1fr)}}
+  .step{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 24px;
+    transition:transform .15s,border-color .15s;
+  }
+  .step:hover{transform:translateY(-3px);border-color:var(--accent)}
+  .step .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:38px;height:38px;border-radius:12px;font-family:'Sora';font-weight:800;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);
+    margin-bottom:16px;font-size:1.05rem;
+  }
+  .step h3{font-size:1.12rem;font-weight:700;margin-bottom:8px}
+  .step p{color:var(--muted);font-size:.93rem}
+
+  /* perks */
+  .perks{list-style:none;max-width:34rem;margin:0 auto;display:grid;gap:12px}
+  .perks li{
+    display:flex;gap:12px;align-items:flex-start;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:15px 18px;font-size:.95rem;
+  }
+  .perks li .tick{color:var(--accent);font-weight:800;flex:none}
+  .perks li b{font-weight:600}
+  .perks li span{color:var(--muted)}
+
+  /* waitlist */
+  #lista{padding:72px 0 84px}
+  .form-card{
+    max-width:520px;margin:0 auto;background:linear-gradient(160deg,var(--bg2),var(--card));
+    border:1px solid var(--line);border-radius:24px;padding:40px 30px;text-align:center;
+    box-shadow:0 24px 70px rgba(0,0,0,.5);
+  }
+  .form-card .dog{font-size:3rem;margin-bottom:10px}
+  .form-card h2{margin-bottom:10px}
+  .form-card p{color:var(--muted);font-size:.95rem;margin-bottom:26px}
+  .form-card p b{color:var(--accent2);font-weight:600}
+  form.waitlist{display:flex;flex-direction:column;gap:12px}
+  form.waitlist input[type=email]{
+    width:100%;padding:15px 18px;border-radius:12px;font-size:1rem;
+    border:1px solid var(--line);background:var(--bg);color:var(--text);
+    font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;
+  }
+  form.waitlist input[type=email]:focus{border-color:var(--accent)}
+  form.waitlist input::placeholder{color:#6f6250}
+  form.waitlist button{
+    width:100%;padding:15px;border:none;border-radius:12px;cursor:pointer;
+    font-family:'Sora';font-weight:700;font-size:1.02rem;color:var(--bg);
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    transition:transform .15s,box-shadow .15s;
+  }
+  form.waitlist button:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(255,138,42,.35)}
+  .privacy{margin-top:16px;font-size:.8rem;color:#6f6250}
+  .hidden-field{display:none}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:34px 0 40px;text-align:center;position:relative;z-index:1}
+  footer .f-logo{font-family:'Sora';font-weight:800;font-size:1.1rem;margin-bottom:8px}
+  footer p{color:#6f6250;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#"><span class="paw">🐕</span> Hound</a>
+    <a class="nav-cta" href="#lista">Lista de espera</a>
+  </nav>
+
+  <header class="hero">
+    <span class="badge">🐾 En preparación · Hecho en España</span>
+    <h1>El perro que <span class="sniff">caza chollos</span> por ti.</h1>
+    <p>Dile a Hound qué quieres comprar. Lo vigila día y noche en las tiendas y <b>te silba por Telegram en cuanto baja de precio</b>. Tú solo cobras el chollo.</p>
+    <div class="cta-row">
+      <a class="cta" href="#lista">Quiero mi Hound 🐕</a>
+      <span class="mini">Gratis durante la beta · Sin instalar nada</span>
+    </div>
+
+    <div class="chat" aria-label="Ejemplo de conversación con Hound">
+      <div class="chat-head">
+        <span class="avatar">🐕</span>
+        <div>
+          <div class="name">Hound</div>
+          <div class="status">● olfateando precios</div>
+        </div>
+      </div>
+      <div class="bubble user">Oye Hound, quiero las Nike Air Max 90, talla 43 👟</div>
+      <div class="bubble hound">¡Guau! Las tengo a <b>139,99 €</b>. Me pongo al acecho y te aviso cuando bajen. 🦴</div>
+      <div class="bubble hound">🚨 <b>¡CHOLLO!</b> Han bajado a <span class="price">97,99 €</span> (−30%) en Foot Locker. ¡Corre, que vuelan! 🐾</div>
+    </div>
+  </header>
+
+  <section id="como-funciona">
+    <p class="kicker">Cómo funciona</p>
+    <h2>Tres pasos y a ahorrar</h2>
+    <p class="sub">Sin apps nuevas, sin cuentas complicadas. Hound vive en Telegram y habla como un colega.</p>
+    <div class="steps">
+      <div class="step">
+        <span class="num">1</span>
+        <h3>Dinos qué quieres</h3>
+        <p>Unas zapatillas, una freidora de aire, ese monitor que llevas meses mirando. Escríbele a Hound por Telegram como quien habla con un amigo.</p>
+      </div>
+      <div class="step">
+        <span class="num">2</span>
+        <h3>Hound vigila el precio</h3>
+        <p>Rastrea el precio a diario en las principales tiendas. No duerme, no se distrae y no suelta el rastro. Bueno, a veces se distrae con una pelota. 🎾</p>
+      </div>
+      <div class="step">
+        <span class="num">3</span>
+        <h3>Te avisa cuando baja</h3>
+        <p>En cuanto detecta una bajada de verdad, te llega el chivatazo con el enlace directo para comprar. Ni spam, ni humo, ni "ofertas" falsas.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="por-que">
+    <p class="kicker">Por qué Hound</p>
+    <h2>Un buen perro no molesta</h2>
+    <p class="sub">Hound solo habla cuando hay algo que merece la pena. El resto del tiempo, calladito y vigilando.</p>
+    <ul class="perks">
+      <li><span class="tick">✓</span><div><b>Cero apps que instalar.</b> <span>Todo pasa por Telegram, que ya tienes.</span></div></li>
+      <li><span class="tick">✓</span><div><b>Cero publicidad.</b> <span>Solo recibes los chollos que tú has pedido. Nada más.</span></div></li>
+      <li><span class="tick">✓</span><div><b>Bajadas reales.</b> <span>Hound conoce el historial de precios y huele las falsas ofertas a kilómetros.</span></div></li>
+      <li><span class="tick">✓</span><div><b>Gratis en la beta.</b> <span>Los primeros de la lista lo tendrán gratis para siempre.</span></div></li>
+    </ul>
+  </section>
+
+  <section id="lista">
+    <div class="form-card">
+      <div class="dog">🐕‍🦺</div>
+      <h2>Apúntate a la lista de espera</h2>
+      <p>Estamos afinando el olfato. Déjanos tu email y serás de los primeros en soltar a Hound. <b>Los 100 primeros, beta gratis para siempre.</b></p>
+      <form class="waitlist" id="waitlist-form" action="https://formspree.io/f/mbgozlok" method="POST">
+        <input type="hidden" name="_subject" value="Nuevo email en la lista de espera de Hound">
+        <input type="text" name="_gotcha" class="hidden-field" tabindex="-1" autocomplete="off">
+        <input type="email" name="email" placeholder="tu@email.com" required autocomplete="email" aria-label="Tu email">
+        <button type="submit" id="waitlist-btn">Apuntarme 🐾</button>
+      </form>
+      <p id="waitlist-ok" style="display:none;color:#7ddb8a;font-weight:600;margin-top:4px">¡Guau! Ya estás en la lista. 🐕 Te avisaremos muy pronto.</p>
+      <p id="waitlist-error" style="display:none;color:#ff7a6b;font-size:.9rem;margin-top:4px">Ups, algo ha fallado. Inténtalo de nuevo en un momento.</p>
+      <script>
+        document.getElementById('waitlist-form').addEventListener('submit', async function(e){
+          e.preventDefault();
+          var btn = document.getElementById('waitlist-btn');
+          btn.disabled = true; btn.textContent = 'Enviando...';
+          try {
+            var res = await fetch(this.action, {method:'POST', body:new FormData(this), headers:{'Accept':'application/json'}});
+            if (res.ok) {
+              this.style.display = 'none';
+              document.getElementById('waitlist-ok').style.display = 'block';
+            } else { throw new Error(); }
+          } catch(err) {
+            btn.disabled = false; btn.textContent = 'Apuntarme 🐾';
+            document.getElementById('waitlist-error').style.display = 'block';
+          }
+        });
+      </script>
+      <p class="privacy">Cero spam. Solo te escribiremos cuando Hound esté listo para cazar.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="f-logo">🐕 Hound</div>
+    <p>Hecho con mucho olfato en Madrid · hound.es (en camino) · © 2026</p>
+  </div>
+</footer>
+</body>
+</html>
